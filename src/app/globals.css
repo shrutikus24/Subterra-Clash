@@ -1,0 +1,83 @@
+/* Scan only src/ (not the project root), so build output, caches or stray folders never affect
+   which classes are generated. */
+@import "tailwindcss" source(none);
+@source "..";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+
+  /* Surfaces & ink */
+  --color-canvas: #e8e8e6;
+  --color-shell: #f4f4f2;
+  --color-card: #ffffff;
+  --color-sunken: #f7f7f5;
+  --color-line: #e6e5e1;
+  --color-ink: #1a1a19;
+  --color-ink-2: #55554f;
+  --color-ink-3: #6b6b65;
+
+  /* Status (fixed; always paired with icon + label) */
+  --color-sev-critical: #d03b3b;
+  --color-sev-high: #ec835a;
+  --color-sev-medium: #fab219;
+  --color-sev-low: #0ca30c;
+  --color-sev-needs-data: #8a8a85;
+
+  /* Selection / neutral action */
+  --color-accent: #0e7490;
+  --color-accent-soft: #e0f2f6;
+  --color-accent-bright: #06b6d4;
+
+  /* Utility types: water blue, sewer brown, electric yellow, gas orange, telecom purple. Validated
+     (all pairs, light surface); yellow is below 3:1 contrast, so it always appears with a text label. */
+  --color-util-water: #2a78d6;
+  --color-util-sewer: #904f10;
+  --color-util-electric: #c8b400;
+  --color-util-gas: #f0620f;
+  --color-util-telecom: #a8329e;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.maplibregl-popup-content {
+  border-radius: 12px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.12) !important;
+  font-family: var(--font-sans);
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  body {
+    background: #ffffff;
+    /* Keep severity and utility colours in printed reports. */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
