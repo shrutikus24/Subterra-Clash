@@ -14,12 +14,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen p-0 sm:p-3 lg:p-5 print:min-h-0 print:p-0">
       <div className="mx-auto flex min-h-screen max-w-380 flex-col rounded-none bg-shell sm:min-h-[calc(100vh-1.5rem)] sm:rounded-4xl lg:min-h-[calc(100vh-2.5rem)] print:min-h-0 print:rounded-none print:bg-white">
         <TopBar />
-        <div className="flex flex-1 gap-5 px-3 pb-5 sm:px-5 print:p-0">
-          <Sidebar />
-          <main id="main" className="min-w-0 flex-1">
-            {children}
-          </main>
-        </div>
+        <main id="main" className="min-w-0 flex-1 px-3 pb-5 sm:px-5 print:p-0">
+          {children}
+        </main>
         <SyntheticDisclaimer />
       </div>
     </div>
@@ -81,7 +78,7 @@ function TopBar() {
           <DatasetBadge />
           <button
             type="button"
-            className="grid size-11 place-items-center rounded-full bg-card shadow-sm md:hidden"
+            className="grid size-11 place-items-center rounded-full bg-card shadow-sm xl:hidden"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -93,9 +90,11 @@ function TopBar() {
       </div>
 
       {menuOpen && (
-        <div id="mobile-menu" className="mt-3 rounded-3xl bg-card p-3 shadow-sm md:hidden">
-          <SearchBox />
-          <nav aria-label="Mobile" className="mt-3">
+        <div id="mobile-menu" className="mt-3 rounded-3xl bg-card p-3 shadow-sm xl:hidden">
+          <div className="mb-3 md:hidden">
+            <SearchBox />
+          </div>
+          <nav aria-label="Mobile">
             <ul className="grid gap-1">
               {NAV_ITEMS.map((item) => {
                 const active = isActive(pathname, item.href);
@@ -286,46 +285,15 @@ function DatasetBadge() {
   );
 }
 
-function Sidebar() {
-  const pathname = usePathname();
-  return (
-    <nav aria-label="Sections" className="sticky top-5 hidden h-fit md:block print:hidden">
-      <ul className="flex flex-col gap-1.5 rounded-full bg-card p-2 shadow-sm">
-        {NAV_ITEMS.map((item) => {
-          const active = isActive(pathname, item.href);
-          const Icon = item.icon;
-          return (
-            <li key={item.href} className="group relative">
-              <Link
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                aria-label={item.label}
-                className={`grid size-11 place-items-center rounded-full transition-colors ${
-                  active ? "bg-ink text-white" : "text-ink-2 hover:bg-sunken hover:text-ink"
-                }`}
-              >
-                <Icon className="size-4.5" aria-hidden />
-              </Link>
-              <span
-                role="tooltip"
-                className="pointer-events-none absolute top-1/2 left-full z-20 ml-3 -translate-y-1/2 rounded-lg bg-ink px-2.5 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
-              >
-                {item.label}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
-}
-
 function SyntheticDisclaimer() {
   return (
     <footer className="mx-3 mb-3 rounded-2xl border border-line bg-card px-4 py-3 text-xs text-ink-2 sm:mx-5 sm:mb-5">
       <strong className="font-semibold text-ink">Synthetic demonstration data.</strong> Not verified underground
       utility survey data. Subterra Clash provides engineering decision support only; it does not approve or reject
-      excavation permits. Always confirm utility locations on site before excavating.
+      excavation permits. Always confirm utility locations on site before excavating.{" "}
+      <Link href="/public" className="font-medium text-accent underline-offset-2 hover:underline">
+        Open the public works portal
+      </Link>
     </footer>
   );
 }

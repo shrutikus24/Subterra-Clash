@@ -1,15 +1,14 @@
 "use client";
 
-import { Download, FileText, FileWarning } from "lucide-react";
+import { FileText, FileWarning } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { SeverityBadge, UtilitySwatch } from "@/components/dashboard/badges";
 import { useDashboard } from "@/components/dashboard/DashboardProvider";
 import { ACTION_LABEL, DATA_QUALITY_LABEL } from "@/components/dashboard/meta";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState, Panel } from "@/components/dashboard/Panel";
 import { formatDate } from "@/lib/format";
-import { SEVERITY_PRIORITY, clashesToCsv } from "@/lib/reports";
+import { SEVERITY_PRIORITY } from "@/lib/reports";
 import { INSPECTION_ACTIONS, UTILITY_TYPES } from "@/types";
 
 function Tile({ label, value }: { label: string; value: number }) {
@@ -24,26 +23,7 @@ function Tile({ label, value }: { label: string; value: number }) {
 const pct = (n: number, total: number) => (total ? `${Math.round((n / total) * 100)}%` : "—");
 
 export function ReportsView() {
-  const { dataset, summary, dataQuality, rankedClashes, assetById, reviewStatusOf, analysisDate } = useDashboard();
-  const [exportError, setExportError] = useState<string | null>(null);
-
-  const exportCsv = () => {
-    try {
-      const csv = clashesToCsv(rankedClashes, dataset, reviewStatusOf);
-      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `subterra-clash-conflicts-synthetic-${analysisDate}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-      setExportError(null);
-    } catch (err) {
-      setExportError(err instanceof Error ? err.message : "Export failed.");
-    }
-  };
-
+  const { dataset, summary, dataQuality, assetById, analysisDate } = useDashboard();
   const actions = INSPECTION_ACTIONS.filter((a) => summary.byAction[a] > 0);
 
   return (
@@ -52,29 +32,14 @@ export function ReportsView() {
         title="Reports"
         subtitle={`Summary of clash-engine results for the synthetic dataset, analysed ${formatDate(analysisDate)}.`}
         actions={
-          <>
-            <Link
-              href="/reports/inspection"
-              className="flex h-11 items-center gap-2 rounded-full border border-line bg-card px-5 text-sm font-medium hover:bg-sunken"
-            >
-              <FileText className="size-4" aria-hidden /> Inspection report (PDF)
-            </Link>
-            <button
-              type="button"
-              onClick={exportCsv}
-              disabled={rankedClashes.length === 0}
-              className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-white hover:bg-ink/90 disabled:opacity-50"
-            >
-              <Download className="size-4" aria-hidden /> Export CSV
-            </button>
-          </>
+          <Link
+            href="/reports/inspection"
+            className="flex h-11 items-center gap-2 rounded-full border border-line bg-card px-5 text-sm font-medium hover:bg-sunken"
+          >
+            <FileText className="size-4" aria-hidden /> Inspection report (PDF)
+          </Link>
         }
       />
-      {exportError && (
-        <p role="alert" className="mb-4 rounded-2xl border border-sev-critical/40 bg-[#fbeaea] px-4 py-2 text-sm">
-          {exportError}
-        </p>
-      )}
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Tile label="Potential conflicts" value={summary.totalClashes} />
@@ -200,11 +165,6 @@ export function ReportsView() {
           )}
         </Panel>
       </section>
-
-      <p className="mt-4 text-xs text-ink-3">
-        The CSV contains every detected conflict with its evidence, reason codes, recommended action and the review
-        status recorded in this browser. Unknown measurements are exported as empty cells, never as zero.
-      </p>
     </>
   );
 }

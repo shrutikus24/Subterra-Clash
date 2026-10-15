@@ -1,16 +1,8 @@
 "use client";
 
-import { bbox, buffer, featureCollection, lineString, point } from "@turf/turf";
+import { buffer, featureCollection, lineString, point } from "@turf/turf";
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import {
-  Map as MapLibreMap,
-  NavigationControl,
-  Popup,
-  setWorkerUrl,
-  type GeoJSONSource,
-  type MapMouseEvent,
-  type StyleSpecification,
-} from "maplibre-gl";
+import { Map as MapLibreMap, NavigationControl, Popup, type GeoJSONSource, type MapMouseEvent } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useMemo, useRef } from "react";
 import { resolveCssColor } from "@/components/dashboard/colors";
@@ -19,6 +11,7 @@ import { SEVERITY_META, UTILITY_META } from "@/components/dashboard/meta";
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from "@/lib/data/config";
 import { shortClashId } from "@/lib/format";
 import { conflictMarkers } from "@/lib/map/markers";
+import { BASEMAP_STYLE, fitTo } from "./basemap";
 import { UTILITY_TYPES, type ConflictSeverity, type UtilityType } from "@/types";
 
 export type MapStatus = { state: "loading" } | { state: "ready"; basemapError: boolean } | { state: "error"; message: string };
@@ -32,43 +25,9 @@ export interface MapViewProps {
   onStatus: (status: MapStatus) => void;
 }
 
-// MapLibre v6 parses GeoJSON in a Web Worker that the bundler cannot locate on its own;
-// scripts/copy-maplibre-worker.mjs places it in /public before dev and build.
-setWorkerUrl("/maplibre-gl-worker.mjs");
-
-// Keyless OpenStreetMap raster basemap, desaturated so data layers stay dominant.
-const BASEMAP_STYLE: StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      maxzoom: 19,
-      attribution: "© OpenStreetMap contributors",
-    },
-  },
-  layers: [
-    { id: "background", type: "background", paint: { "background-color": "#f4f4f2" } },
-    { id: "osm", type: "raster", source: "osm", paint: { "raster-saturation": -0.85, "raster-opacity": 0.7 } },
-  ],
-};
-
 const ASSET_LAYERS = UTILITY_TYPES.map((t) => `asset-${t}`);
 const CLICKABLE_LAYERS = [...ASSET_LAYERS, "excavation-fill"];
 const cssColor = (value: string) => resolveCssColor(value);
-
-function fitTo(map: MapLibreMap, collection: FeatureCollection, maxZoom = 18) {
-  if (collection.features.length === 0) return;
-  const [minX, minY, maxX, maxY] = bbox(collection);
-  map.fitBounds(
-    [
-      [minX, minY],
-      [maxX, maxY],
-    ],
-    { padding: 48, maxZoom, duration: 600 },
-  );
-}
 
 export function MapView({ visibleTypes, showExcavations, showConflicts, fitAllRequest, onStatus }: MapViewProps) {
   const {

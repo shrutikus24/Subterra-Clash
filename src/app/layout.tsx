@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { DashboardProvider } from "@/components/dashboard/DashboardProvider";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { getDashboardData } from "@/lib/data";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,6 +9,10 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#e8e8e6" };
 
+/**
+ * Document shell only. The engineering dashboard and the public portal each load their own data in
+ * their own layout, so public pages never receive the internal engineering dataset.
+ */
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
@@ -22,9 +23,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         >
           Skip to content
         </a>
-        <DashboardProvider data={getDashboardData()}>
-          <DashboardShell>{children}</DashboardShell>
-        </DashboardProvider>
+        {children}
       </body>
     </html>
   );
